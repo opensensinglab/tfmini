@@ -52,21 +52,21 @@ class TFMini {
     TFMini(void);
 
     // Configuration
-    boolean begin(Stream &__stream);
+    boolean begin(Stream* _streamPtr);
 
     // Data collection
-    uint16_t getDistance(Stream &_stream);
+    uint16_t getDistance();
     uint16_t getRecentSignalStrength();
 
   private:
-    //Stream &_stream;
+    Stream* streamPtr;
     int state;
     uint16_t distance;
     uint16_t strength;
     
     // Low-level communication
-    void setStandardOutputMode(Stream &_stream);
-    int takeMeasurement(Stream &_stream);
+    void setStandardOutputMode();
+    int takeMeasurement();
     
     
 };

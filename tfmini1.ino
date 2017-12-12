@@ -48,13 +48,13 @@ void setup() {
   mySerial.begin(TFMINI_BAUDRATE);
 
   // Step 3: Initialize the TF Mini sensor
-  tfmini.begin(mySerial);    
+  tfmini.begin(&mySerial);    
 }
 
 
 void loop() {
   // Take one TF Mini distance measurement
-  uint16_t dist = tfmini.getDistance(mySerial);
+  uint16_t dist = tfmini.getDistance();
   uint16_t strength = tfmini.getRecentSignalStrength();
 
   // Display the measurement

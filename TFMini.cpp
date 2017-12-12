@@ -20,31 +20,32 @@ derived from this software without specific prior written permission.
 
 #include "TFMini.h"
 
-TFMini::TFMini() {
-  // Constructor
+// Constructor
+TFMini::TFMini() { 
+  // Empty constructor
 }
 
 
-boolean TFMini::begin(Stream &__stream) {
-  // Store serial stream reference
-  //_stream = __stream;  
+boolean TFMini::begin(Stream* _streamPtr) {
+  // Store reference to stream/serial object
+  streamPtr = _streamPtr;
 
   // Clear state
   distance = -1;
   strength = -1;
   state = READY;
-
+  
   // Set standard output mode
-  setStandardOutputMode(__stream);
+  setStandardOutputMode();
   
   return true;
 }
 
 
 // Public: The main function to measure distance. 
-uint16_t TFMini::getDistance(Stream &_stream) {
+uint16_t TFMini::getDistance() {
   int numMeasurementAttempts = 0;
-  while (takeMeasurement(_stream) != 0) {
+  while (takeMeasurement() != 0) {
     numMeasurementAttempts += 1;
     if (numMeasurementAttempts > TFMINI_MAX_MEASUREMENT_ATTEMPTS) {
       Serial.println ("TF Mini error: too many measurement attempts");
@@ -75,31 +76,31 @@ uint16_t TFMini::getRecentSignalStrength() {
 
 
 // Private: Set the TF Mini into the correct measurement mode
-void TFMini::setStandardOutputMode(Stream &_stream) {
+void TFMini::setStandardOutputMode() {
   // Set to "standard" output mode (this is found in the debug documents)
-  _stream.write((uint8_t)0x42);
-  _stream.write((uint8_t)0x57);
-  _stream.write((uint8_t)0x02);
-  _stream.write((uint8_t)0x00);
-  _stream.write((uint8_t)0x00);
-  _stream.write((uint8_t)0x00);
-  _stream.write((uint8_t)0x01);
-  _stream.write((uint8_t)0x06);
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x01);
+  streamPtr->write((uint8_t)0x06);
 
   delay(100);  
 }
 
 
 // Private: Handles the low-level bits of communicating with the TFMini, and detecting some communication errors.
-int TFMini::takeMeasurement(Stream &_stream) {
+int TFMini::takeMeasurement() {
   int numCharsRead = 0;
   uint8_t lastChar = 0x00;  
   
   // Step 1: Read the serial stream until we see the beginning of the TF Mini header, or we timeout reading too many characters.
   while (1) {
 
-    if (_stream.available()) {      
-      uint8_t curChar = _stream.read();
+    if (streamPtr->available()) {      
+      uint8_t curChar = streamPtr->read();
 
       if ((lastChar == 0x59) && (curChar == 0x59)) {
         // Break to begin frame
@@ -130,10 +131,10 @@ int TFMini::takeMeasurement(Stream &_stream) {
   uint8_t checksum = 0x59 + 0x59;
   for (int i=0; i<TFMINI_FRAME_SIZE; i++) {
     // Read one character
-    while (!_stream.available()) {
+    while (!streamPtr->available()) {
       // wait for a character to become available
     }    
-    frame[i] = _stream.read();
+    frame[i] = streamPtr->read();
 
     // Store running checksum
     if (i < TFMINI_FRAME_SIZE-2) {
