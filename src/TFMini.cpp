@@ -18,7 +18,7 @@ The names of the contributors may not be used to endorse or promote products
 derived from this software without specific prior written permission.
 */
 
-#include "./TFMini.h"
+#include "TFMini.h"
 
 // Constructor
 TFMini::TFMini() { 
