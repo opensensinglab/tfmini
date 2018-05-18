@@ -12,9 +12,11 @@ TFMini	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-begin						KEYWORD2
-getDistance 				KEYWORD2
+begin				KEYWORD2
+getDistance 			KEYWORD2
 getRecentSignalStrength		KEYWORD2
+setSingleScanMode		KEYWORD2
+externalTrigger			KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
