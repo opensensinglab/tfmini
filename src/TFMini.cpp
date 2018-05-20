@@ -68,7 +68,6 @@ uint16_t TFMini::getDistance() {
   }
 }
 
-
 // Public: Return the most recent signal strength measuremenet from the TF Mini
 uint16_t TFMini::getRecentSignalStrength() {
   return strength;
@@ -86,10 +85,48 @@ void TFMini::setStandardOutputMode() {
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x01);
   streamPtr->write((uint8_t)0x06);
-
-  delay(100);  
 }
 
+// Set configuration mode
+void TFMini::setConfigMode() {
+  // advanced parameter configuration mode
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x01);
+  streamPtr->write((uint8_t)0x02);  
+}
+
+// Set single scan mode (external trigger)
+void TFMini::setSingleScanMode() {
+  setConfigMode();
+  // setting trigger source to external
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x40);
+}
+
+// Send external trigger
+void TFMini::externalTrigger() {
+  setConfigMode();      
+  // send trigger
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x41);
+}
 
 // Private: Handles the low-level bits of communicating with the TFMini, and detecting some communication errors.
 int TFMini::takeMeasurement() {

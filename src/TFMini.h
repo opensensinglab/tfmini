@@ -53,10 +53,12 @@ class TFMini {
 
     // Configuration
     boolean begin(Stream* _streamPtr);
-
+    void setSingleScanMode();
+    
     // Data collection
     uint16_t getDistance();
     uint16_t getRecentSignalStrength();
+    void externalTrigger();
 
   private:
     Stream* streamPtr;
@@ -66,8 +68,8 @@ class TFMini {
     
     // Low-level communication
     void setStandardOutputMode();
+    void setConfigMode();
     int takeMeasurement();
-    
     
 };
 
