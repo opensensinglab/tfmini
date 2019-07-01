@@ -43,6 +43,13 @@ derived from this software without specific prior written permission.
 #define ERROR_SERIAL_TOOMANYTRIES         3
 #define MEASUREMENT_OK                    10
 
+enum MODE {
+  ZERO=0x00,   // for 0-2m
+  SHORT=0x02,  // for 0-5m
+  MIDDLE=0x03, // for 0.5-5m
+  LONG=0x07    // for 1-12m
+};
+
 
 //
 // Driver Class Definition
@@ -54,10 +61,12 @@ class TFMini {
     // Configuration
     boolean begin(Stream* _streamPtr);
     void setSingleScanMode();
+    void setMeasurementMode(MODE _mode);
     
     // Data collection
     uint16_t getDistance();
     uint16_t getRecentSignalStrength();
+    uint8_t getMode();
     void externalTrigger();
 
   private:
@@ -65,10 +74,12 @@ class TFMini {
     int state;
     uint16_t distance;
     uint16_t strength;
+    uint8_t mode;
     
     // Low-level communication
     void setStandardOutputMode();
     void setConfigMode();
+    void unsetConfigMode();
     int takeMeasurement();
     
 };

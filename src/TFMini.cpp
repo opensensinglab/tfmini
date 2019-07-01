@@ -33,6 +33,7 @@ boolean TFMini::begin(Stream* _streamPtr) {
   // Clear state
   distance = -1;
   strength = -1;
+  mode = -1;
   state = READY;
   
   // Set standard output mode
@@ -73,6 +74,11 @@ uint16_t TFMini::getRecentSignalStrength() {
   return strength;
 }
 
+// Public: Return the measurement mode
+uint8_t TFMini::getMode() {
+  return mode;
+}
+
 
 // Private: Set the TF Mini into the correct measurement mode
 void TFMini::setStandardOutputMode() {
@@ -97,7 +103,21 @@ void TFMini::setConfigMode() {
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x01);
+  streamPtr->write((uint8_t)0x02);
+  delay(100);
+}
+
+// Exit configuration mode
+void TFMini::unsetConfigMode() {
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x02);  
+  delay(100);
 }
 
 // Set single scan mode (external trigger)
@@ -112,6 +132,39 @@ void TFMini::setSingleScanMode() {
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x40);
+  delay(100);
+  unsetConfigMode();
+}
+
+// Set measurement mode
+void TFMini::setMeasurementMode(MODE _mode) {
+  setConfigMode();
+
+  // fix detection pattern
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x01);
+  streamPtr->write((uint8_t)0x14);
+
+  delay(100);
+
+  // setting measurement mode
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)_mode);
+  streamPtr->write((uint8_t)0x11);
+
+  delay(100);
+
+  unsetConfigMode();
 }
 
 // Send external trigger
@@ -126,6 +179,8 @@ void TFMini::externalTrigger() {
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x41);
+  delay(100);
+  unsetConfigMode();
 }
 
 // Private: Handles the low-level bits of communicating with the TFMini, and detecting some communication errors.
@@ -155,7 +210,8 @@ int TFMini::takeMeasurement() {
     if (numCharsRead > TFMINI_MAXBYTESBEFOREHEADER) {
       state = ERROR_SERIAL_NOHEADER;
       distance = -1;
-      strength = -1;     
+      strength = -1;  
+      mode = -1;    
       if (TFMINI_DEBUGMODE == 1) Serial.println("ERROR: no header");
       return -1;      
     }
@@ -201,6 +257,7 @@ int TFMini::takeMeasurement() {
   // Step 4: Store values
   distance = dist;
   strength = st;
+  mode = reserved;
   state = MEASUREMENT_OK;
 
   // Return success
