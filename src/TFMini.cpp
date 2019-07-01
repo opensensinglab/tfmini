@@ -21,12 +21,13 @@ derived from this software without specific prior written permission.
 #include "TFMini.h"
 
 // Constructor
-TFMini::TFMini() { 
+TFMini::TFMini()
+{
   // Empty constructor
 }
 
-
-boolean TFMini::begin(Stream* _streamPtr) {
+boolean TFMini::begin(Stream *_streamPtr)
+{
   // Store reference to stream/serial object
   streamPtr = _streamPtr;
 
@@ -35,53 +36,63 @@ boolean TFMini::begin(Stream* _streamPtr) {
   strength = -1;
   mode = -1;
   state = READY;
-  
+
   // Set standard output mode
   setStandardOutputMode();
-  
+
   return true;
 }
 
-
-// Public: The main function to measure distance. 
-uint16_t TFMini::getDistance() {
+// Public: The main function to measure distance.
+uint16_t TFMini::getDistance()
+{
   int numMeasurementAttempts = 0;
-  while (takeMeasurement() != 0) {
+  while (takeMeasurement() != 0)
+  {
     numMeasurementAttempts += 1;
-    if (numMeasurementAttempts > TFMINI_MAX_MEASUREMENT_ATTEMPTS) {
-      Serial.println ("TF Mini error: too many measurement attempts");
-      Serial.println ("Last error:");
-      if (state == ERROR_SERIAL_NOHEADER)     Serial.println("ERROR_SERIAL_NOHEADER");
-      if (state == ERROR_SERIAL_BADCHECKSUM)  Serial.println("ERROR_SERIAL_BADCHECKSUM");
-      if (state == ERROR_SERIAL_TOOMANYTRIES) Serial.println("ERROR_SERIAL_TOOMANYTRIES");      
-      
+    if (numMeasurementAttempts > TFMINI_MAX_MEASUREMENT_ATTEMPTS)
+    {
+      Serial.println("TF Mini error: too many measurement attempts");
+      Serial.println("Last error:");
+      if (state == ERROR_SERIAL_NOHEADER)
+        Serial.println("ERROR_SERIAL_NOHEADER");
+      if (state == ERROR_SERIAL_BADCHECKSUM)
+        Serial.println("ERROR_SERIAL_BADCHECKSUM");
+      if (state == ERROR_SERIAL_TOOMANYTRIES)
+        Serial.println("ERROR_SERIAL_TOOMANYTRIES");
+
       state = ERROR_SERIAL_TOOMANYTRIES;
       distance = -1;
-      strength = -1;      
-      return -1;      
+      strength = -1;
+      return -1;
     }
   }
 
-  if (state == MEASUREMENT_OK) {
+  if (state == MEASUREMENT_OK)
+  {
     return distance;
-  } else {
+  }
+  else
+  {
     return -1;
   }
 }
 
 // Public: Return the most recent signal strength measuremenet from the TF Mini
-uint16_t TFMini::getRecentSignalStrength() {
+uint16_t TFMini::getRecentSignalStrength()
+{
   return strength;
 }
 
 // Public: Return the measurement mode
-uint8_t TFMini::getMode() {
+uint8_t TFMini::getMode()
+{
   return mode;
 }
 
-
 // Private: Set the TF Mini into the correct measurement mode
-void TFMini::setStandardOutputMode() {
+void TFMini::setStandardOutputMode()
+{
   // Set to "standard" output mode (this is found in the debug documents)
   streamPtr->write((uint8_t)0x42);
   streamPtr->write((uint8_t)0x57);
@@ -94,7 +105,8 @@ void TFMini::setStandardOutputMode() {
 }
 
 // Set configuration mode
-void TFMini::setConfigMode() {
+void TFMini::setConfigMode()
+{
   // advanced parameter configuration mode
   streamPtr->write((uint8_t)0x42);
   streamPtr->write((uint8_t)0x57);
@@ -108,7 +120,8 @@ void TFMini::setConfigMode() {
 }
 
 // Exit configuration mode
-void TFMini::unsetConfigMode() {
+void TFMini::unsetConfigMode()
+{
   streamPtr->write((uint8_t)0x42);
   streamPtr->write((uint8_t)0x57);
   streamPtr->write((uint8_t)0x02);
@@ -116,12 +129,13 @@ void TFMini::unsetConfigMode() {
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
-  streamPtr->write((uint8_t)0x02);  
+  streamPtr->write((uint8_t)0x02);
   delay(100);
 }
 
 // Set single scan mode (external trigger)
-void TFMini::setSingleScanMode() {
+void TFMini::setSingleScanMode()
+{
   setConfigMode();
   // setting trigger source to external
   streamPtr->write((uint8_t)0x42);
@@ -137,7 +151,8 @@ void TFMini::setSingleScanMode() {
 }
 
 // Set measurement mode
-void TFMini::setMeasurementMode(MODE _mode) {
+void TFMini::setMeasurementMode(MODE _mode)
+{
   setConfigMode();
 
   // fix detection pattern
@@ -168,8 +183,9 @@ void TFMini::setMeasurementMode(MODE _mode) {
 }
 
 // Send external trigger
-void TFMini::externalTrigger() {
-  setConfigMode();      
+void TFMini::externalTrigger()
+{
+  setConfigMode();
   // send trigger
   streamPtr->write((uint8_t)0x42);
   streamPtr->write((uint8_t)0x57);
@@ -184,75 +200,84 @@ void TFMini::externalTrigger() {
 }
 
 // Private: Handles the low-level bits of communicating with the TFMini, and detecting some communication errors.
-int TFMini::takeMeasurement() {
+int TFMini::takeMeasurement()
+{
   int numCharsRead = 0;
-  uint8_t lastChar = 0x00;  
-  
-  // Step 1: Read the serial stream until we see the beginning of the TF Mini header, or we timeout reading too many characters.
-  while (1) {
+  uint8_t lastChar = 0x00;
 
-    if (streamPtr->available()) {      
+  // Step 1: Read the serial stream until we see the beginning of the TF Mini header, or we timeout reading too many characters.
+  while (1)
+  {
+
+    if (streamPtr->available())
+    {
       uint8_t curChar = streamPtr->read();
 
-      if ((lastChar == 0x59) && (curChar == 0x59)) {
+      if ((lastChar == 0x59) && (curChar == 0x59))
+      {
         // Break to begin frame
         break;
-        
-      } else {
-        // We have not seen two 0x59's in a row -- store the current character and continue reading.         
+      }
+      else
+      {
+        // We have not seen two 0x59's in a row -- store the current character and continue reading.
         lastChar = curChar;
-        numCharsRead += 1; 
-      }           
+        numCharsRead += 1;
+      }
     }
 
-    // Error detection:  If we read more than X characters without finding a frame header, then it's likely there is an issue with 
-    // the Serial connection, and we should timeout and throw an error. 
-    if (numCharsRead > TFMINI_MAXBYTESBEFOREHEADER) {
+    // Error detection:  If we read more than X characters without finding a frame header, then it's likely there is an issue with
+    // the Serial connection, and we should timeout and throw an error.
+    if (numCharsRead > TFMINI_MAXBYTESBEFOREHEADER)
+    {
       state = ERROR_SERIAL_NOHEADER;
       distance = -1;
-      strength = -1;  
-      mode = -1;    
-      if (TFMINI_DEBUGMODE == 1) Serial.println("ERROR: no header");
-      return -1;      
+      strength = -1;
+      mode = -1;
+      if (TFMINI_DEBUGMODE == 1)
+        Serial.println("ERROR: no header");
+      return -1;
     }
-    
   }
-  
+
   // Step 2: Read one frame from the TFMini
   uint8_t frame[TFMINI_FRAME_SIZE];
 
   uint8_t checksum = 0x59 + 0x59;
-  for (int i=0; i<TFMINI_FRAME_SIZE; i++) {
+  for (int i = 0; i < TFMINI_FRAME_SIZE; i++)
+  {
     // Read one character
-    while (!streamPtr->available()) {
+    while (!streamPtr->available())
+    {
       // wait for a character to become available
-    }    
+    }
     frame[i] = streamPtr->read();
 
     // Store running checksum
-    if (i < TFMINI_FRAME_SIZE-2) {
+    if (i < TFMINI_FRAME_SIZE - 2)
+    {
       checksum += frame[i];
     }
   }
 
   // Step 2A: Compare checksum
-  // Last byte in the frame is an 8-bit checksum 
-  uint8_t checksumByte = frame[TFMINI_FRAME_SIZE-1];
-  if (checksum != checksumByte) {
+  // Last byte in the frame is an 8-bit checksum
+  uint8_t checksumByte = frame[TFMINI_FRAME_SIZE - 1];
+  if (checksum != checksumByte)
+  {
     state = ERROR_SERIAL_BADCHECKSUM;
     distance = -1;
     strength = -1;
-    if (TFMINI_DEBUGMODE == 1) Serial.println("ERROR: bad checksum");
+    if (TFMINI_DEBUGMODE == 1)
+      Serial.println("ERROR: bad checksum");
     return -1;
   }
-
 
   // Step 3: Interpret frame
   uint16_t dist = (frame[1] << 8) + frame[0];
   uint16_t st = (frame[3] << 8) + frame[2];
   uint8_t reserved = frame[4];
   uint8_t originalSignalQuality = frame[5];
-
 
   // Step 4: Store values
   distance = dist;
@@ -261,6 +286,5 @@ int TFMini::takeMeasurement() {
   state = MEASUREMENT_OK;
 
   // Return success
-  return 0;  
+  return 0;
 }
-
