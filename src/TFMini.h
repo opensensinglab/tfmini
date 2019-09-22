@@ -62,6 +62,8 @@ public:
   boolean begin(Stream *_streamPtr);
   void setSingleScanMode();
   void setMeasurementMode(MODE _mode);
+  void setRangeLimit(uint16_t range);
+  void setSignalThreshold(uint8_t min, uint16_t max);
 
   // Data collection
   uint16_t getDistance();

@@ -1,6 +1,7 @@
 /*
 Arduino driver for Benewake TFMini time-of-flight distance sensor. 
 by Peter Jansen (December 11/2017)
+modified for EAWAG volaser (2019)
 This code is open source software in the public domain.
 
 THIS SOFTWARE IS PROVIDED ''AS IS'' AND ANY
@@ -162,7 +163,7 @@ void TFMini::setMeasurementMode(MODE _mode)
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
   streamPtr->write((uint8_t)0x00);
-  streamPtr->write((uint8_t)0x01);
+  streamPtr->write((uint8_t)0x01);  //0x00=unlocked, 0x01=locked
   streamPtr->write((uint8_t)0x14);
 
   delay(100);
@@ -178,6 +179,55 @@ void TFMini::setMeasurementMode(MODE _mode)
   streamPtr->write((uint8_t)0x11);
 
   delay(100);
+
+  unsetConfigMode();
+}
+
+// Set maximum distance
+void TFMini::setRangeLimit(uint16_t range) {
+  setConfigMode();
+
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)(range & 0xff));
+  streamPtr->write((uint8_t)((range >> 8) & 0xff));
+  streamPtr->write((uint8_t)(range > 0 ? 0x01 : 0x00)); // 0x00=range limit disabled, 0x01=enabled
+  streamPtr->write((uint8_t)0x19);
+
+  delay(100);
+
+  unsetConfigMode();
+}
+
+// Set maximum distance
+void TFMini::setSignalThreshold(uint8_t min, uint16_t max) {
+  setConfigMode();
+
+  // Set minimum signal strength
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)min);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)0x20);
+
+  delay(100);  
+
+  // Set maximum signal strength
+  streamPtr->write((uint8_t)0x42);
+  streamPtr->write((uint8_t)0x57);
+  streamPtr->write((uint8_t)0x02);
+  streamPtr->write((uint8_t)0x00);
+  streamPtr->write((uint8_t)(max & 0xff));
+  streamPtr->write((uint8_t)((max >> 8) & 0xff));
+  streamPtr->write((uint8_t)0x1d); // distance to be returned if max signal is exceeded
+  streamPtr->write((uint8_t)0x21);
+
+  delay(100); 
 
   unsetConfigMode();
 }
