@@ -174,7 +174,7 @@ int TFMini::takeMeasurement() {
     frame[i] = streamPtr->read();
 
     // Store running checksum
-    if (i < TFMINI_FRAME_SIZE-2) {
+    if (i < TFMINI_FRAME_SIZE-1) {
       checksum += frame[i];
     }
   }
