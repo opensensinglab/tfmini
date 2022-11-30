@@ -28,6 +28,8 @@ derived from this software without specific prior written permission.
 // Defines
 #define TFMINI_BAUDRATE   115200
 #define TFMINI_DEBUGMODE  0
+#define VER_1_0		  1
+#define VER_1_8		  8
 
 // The frame size is nominally 9 characters, but we don't include the first two 0x59's marking the start of the frame
 #define TFMINI_FRAME_SIZE                 7
@@ -49,7 +51,7 @@ derived from this software without specific prior written permission.
 //
 class TFMini {
   public: 
-    TFMini(void);
+    TFMini(int version = VER_1_0);
 
     // Configuration
     boolean begin(Stream* _streamPtr);
@@ -65,11 +67,12 @@ class TFMini {
     int state;
     uint16_t distance;
     uint16_t strength;
+    int checksumDiff = 0;
     
     // Low-level communication
     void setStandardOutputMode();
     void setConfigMode();
     int takeMeasurement();
-    
+    void setProtocolVersion(int version); 
 };
 
