@@ -21,7 +21,7 @@ derived from this software without specific prior written permission.
 #include "TFMini.h"
 
 // Constructor
-TFMini::TFMini(int version = VER_1_0) {
+TFMini::TFMini(int version) {
   setProtocolVersion(version);
 }
 
