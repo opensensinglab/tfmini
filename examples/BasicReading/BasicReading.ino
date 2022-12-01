@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Setup software serial port 
 SoftwareSerial mySerial(10, 11);      // Uno RX (TFMINI TX), Uno TX (TFMINI RX)
-TFMini tfmini;
+TFMini tfmini(VER_1_0);		      // VER_1_0 or VER_1_8, default: VER_1_0
 
 void setup() {
   // Step 1: Initialize hardware serial port (serial debug port)

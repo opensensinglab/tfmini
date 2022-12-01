@@ -21,8 +21,8 @@ derived from this software without specific prior written permission.
 #include "TFMini.h"
 
 // Constructor
-TFMini::TFMini() { 
-  // Empty constructor
+TFMini::TFMini(int version) {
+  setProtocolVersion(version);
 }
 
 
@@ -37,7 +37,7 @@ boolean TFMini::begin(Stream* _streamPtr) {
   
   // Set standard output mode
   setStandardOutputMode();
-  
+ 
   return true;
 }
 
@@ -73,6 +73,14 @@ uint16_t TFMini::getRecentSignalStrength() {
   return strength;
 }
 
+
+// Public: Set Version
+void TFMini::setProtocolVersion(int version) {
+  checksumDiff = 2;
+  if (version == VER_1_8) {
+    checksumDiff = 1;
+  }
+}
 
 // Private: Set the TF Mini into the correct measurement mode
 void TFMini::setStandardOutputMode() {
@@ -174,7 +182,7 @@ int TFMini::takeMeasurement() {
     frame[i] = streamPtr->read();
 
     // Store running checksum
-    if (i < TFMINI_FRAME_SIZE-2) {
+    if (i < TFMINI_FRAME_SIZE-checksumDiff) {
       checksum += frame[i];
     }
   }
